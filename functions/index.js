@@ -365,6 +365,21 @@ exports.onInquiryCreated = onDocumentCreated(
 );
 
 // =========================================================
+// Firestore Trigger: SEO 설정 변경 시 자동 빌드 트리거
+// =========================================================
+exports.onSettingsWrite = onDocumentWritten(
+  { document: "settings/{docId}", region: "asia-northeast3", secrets: [GITHUB_TOKEN] },
+  async (event) => {
+    try {
+      await triggerGithubDeploy(GITHUB_TOKEN.value());
+      console.log("Build triggered: settings/", event.params.docId);
+    } catch (e) {
+      console.error("Build trigger failed:", e.message);
+    }
+  }
+);
+
+// =========================================================
 // Firestore Trigger: 포트폴리오 변경 시 자동 빌드 트리거
 // =========================================================
 exports.onPortfolioWrite = onDocumentWritten(
