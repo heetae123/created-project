@@ -7,6 +7,11 @@ on:
   push:
     branches: [main]
 
+# 같은 그룹의 빌드가 이미 실행 중이면 취소하고 최신 것만 실행
+concurrency:
+  group: deploy-production
+  cancel-in-progress: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
