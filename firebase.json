@@ -1,0 +1,59 @@
+{
+  "hosting": {
+    "public": "out",
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "cleanUrls": true,
+    "redirects": [
+      {
+        "source": "/www/:path*",
+        "destination": "/:path*",
+        "type": 301
+      }
+    ],
+    "headers": [
+      {
+        "source": "/**",
+        "headers": [
+          { "key": "Cache-Control", "value": "public, max-age=3600" },
+          { "key": "X-Content-Type-Options", "value": "nosniff" },
+          { "key": "X-Frame-Options", "value": "DENY" },
+          { "key": "X-XSS-Protection", "value": "1; mode=block" },
+          { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+        ]
+      },
+      {
+        "source": "/_next/static/**",
+        "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      },
+      {
+        "source": "**/*.@(jpg|jpeg|png|gif|webp|avif|ico|svg|woff|woff2|mp4)",
+        "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      }
+    ],
+    "redirects": [
+      { "source": "/about/", "destination": "/about", "type": 301 },
+      { "source": "/greeting/", "destination": "/greeting", "type": 301 },
+      { "source": "/service/", "destination": "/service", "type": 301 },
+      { "source": "/service/:id/", "destination": "/service/:id", "type": 301 },
+      { "source": "/portfolio/", "destination": "/portfolio", "type": 301 },
+      { "source": "/portfolio/:id/", "destination": "/portfolio/:id", "type": 301 },
+      { "source": "/board/", "destination": "/board", "type": 301 },
+      { "source": "/board/:id/", "destination": "/board/:id", "type": 301 },
+      { "source": "/team/", "destination": "/team", "type": 301 },
+      { "source": "/team/interview/", "destination": "/team/interview", "type": 301 },
+      { "source": "/contact/", "destination": "/contact", "type": 301 }
+    ],
+    "rewrites": [
+      { "source": "/admin/**", "destination": "/admin/index.html" }
+    ]
+  },
+  "functions": {
+    "source": "functions"
+  },
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  }
+}

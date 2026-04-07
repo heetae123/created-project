@@ -1,0 +1,17 @@
+{
+  "name": "MAI PARTNERS - 마이파트너스",
+  "short_name": "MAI PARTNERS",
+  "description": "기업 행사, 컨퍼런스, 페스티벌 등 이벤트/MICE 기획 전문 기업",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#09090b",
+  "theme_color": "#F97316",
+  "icons": [
+    {
+      "src": "/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,162 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Noto Sans KR", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --color-brand: #F97316;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+}
+
+body {
+  @apply bg-[#0a0a0a] text-zinc-50 antialiased;
+  overflow-x: hidden;
+}
+
+::selection {
+  background-color: #F97316;
+  color: white;
+}
+
+/* Custom Scrollbar for premium feel */
+::-webkit-scrollbar {
+  width: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #F97316;
+}
+
+/* For Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.1) transparent;
+}
+
+/* Smooth Focus */
+:focus-visible {
+  outline: 2px solid #F97316;
+  outline-offset: 4px;
+}
+
+/* Quill Editor - admin overrides */
+.ql-editor {
+  color: #111827 !important;
+  min-height: 200px;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+/* Preserve blank lines: Tailwind resets p margins to 0, restore them.
+   Empty paragraphs (<p><br></p>) must keep their height — they are meaningful whitespace. */
+.ql-editor p {
+  margin-bottom: 0.5em;
+  min-height: 1.7em; /* = line-height, guarantees blank lines stay visible */
+}
+.ql-editor p:last-child {
+  margin-bottom: 0;
+}
+
+/* Quill Indentation Classes (8em per level — maximum) */
+.ql-editor .ql-indent-1 { padding-left: 8em !important; }
+.ql-editor .ql-indent-2 { padding-left: 16em !important; }
+.ql-editor .ql-indent-3 { padding-left: 24em !important; }
+.ql-editor .ql-indent-4 { padding-left: 32em !important; }
+.ql-editor .ql-indent-5 { padding-left: 40em !important; }
+.ql-editor .ql-indent-6 { padding-left: 48em !important; }
+.ql-editor .ql-indent-7 { padding-left: 56em !important; }
+.ql-editor .ql-indent-8 { padding-left: 64em !important; }
+
+/* Handle list indentation specifically */
+.ql-editor li.ql-indent-1 { padding-left: 8em !important; }
+.ql-editor li.ql-indent-2 { padding-left: 16em !important; }
+.ql-editor li.ql-indent-3 { padding-left: 24em !important; }
+
+/* Fallback: indent classes outside .ql-editor (e.g. public pages) */
+p.ql-indent-1, div.ql-indent-1 { padding-left: 8em; }
+p.ql-indent-2, div.ql-indent-2 { padding-left: 16em; }
+p.ql-indent-3, div.ql-indent-3 { padding-left: 24em; }
+p.ql-indent-4, div.ql-indent-4 { padding-left: 32em; }
+p.ql-indent-5, div.ql-indent-5 { padding-left: 40em; }
+p.ql-indent-6, div.ql-indent-6 { padding-left: 48em; }
+p.ql-indent-7, div.ql-indent-7 { padding-left: 56em; }
+p.ql-indent-8, div.ql-indent-8 { padding-left: 64em; }
+
+/* Quill Alignment Classes */
+.ql-align-center { text-align: center !important; }
+.ql-align-right { text-align: right !important; }
+.ql-align-justify { text-align: justify !important; }
+
+/* Quill rendered content: ensure all formatting works outside editor */
+.ql-rendered h1, [data-quill] h1 { font-size: 2em; font-weight: 700; margin: 0.67em 0; }
+.ql-rendered h2, [data-quill] h2 { font-size: 1.5em; font-weight: 700; margin: 0.5em 0; }
+.ql-rendered h3, [data-quill] h3 { font-size: 1.17em; font-weight: 700; margin: 0.4em 0; }
+.ql-rendered ol, [data-quill] ol { list-style: decimal; padding-left: 2em; margin: 0.5em 0; }
+.ql-rendered ul, [data-quill] ul { list-style: disc; padding-left: 2em; margin: 0.5em 0; }
+.ql-rendered a, [data-quill] a { color: #F97316; text-decoration: underline; }
+.ql-rendered a:hover, [data-quill] a:hover { color: #EA580C; }
+.ql-rendered img, [data-quill] img { max-width: 100%; height: auto; border-radius: 0.5rem; margin: 0.5em 0; }
+.ql-rendered u { text-decoration: underline; }
+.ql-rendered s { text-decoration: line-through; }
+
+/* Quill video embeds (ql-video class on iframe) — responsive 16:9 */
+.ql-rendered .ql-video,
+.ql-editor .ql-video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: none;
+  border-radius: 0.75rem;
+  margin: 1em 0;
+}
+
+/* Images inside aligned blocks — must come AFTER .ql-rendered img to win specificity.
+   text-align only affects inline elements; Quill renders <img> as display:block,
+   so we use margin to align them instead. !important beats prose/ql-rendered overrides. */
+.ql-align-center img { display: block !important; margin-left: auto !important; margin-right: auto !important; }
+.ql-align-right img  { display: block !important; margin-left: auto !important; margin-right: 0 !important; }
+.ql-align-justify img { display: block !important; }
+
+/* Blank line preservation for rendered content (public pages) */
+.prose p,
+[data-greeting] p {
+  min-height: 1.5em;
+}
+
+.ql-container {
+  background: white;
+  border-radius: 0 0 8px 8px;
+}
+.ql-toolbar {
+  background: #F9FAFB;
+  border-radius: 8px 8px 0 0;
+}
+.ql-editor.ql-blank::before {
+  color: #9CA3AF !important;
+  font-style: normal !important;
+}
+/* Quill size dropdown - scrollable and show pt values */
+.ql-snow .ql-picker.ql-size .ql-picker-label::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item::before {
+  content: attr(data-value) !important;
+}
+.ql-snow .ql-picker.ql-size .ql-picker-label[data-value=""]::before,
+.ql-snow .ql-picker.ql-size .ql-picker-item[data-value=""]::before {
+  content: '기본' !important;
+}
+.ql-snow .ql-picker.ql-size .ql-picker-options {
+  max-height: 200px;
+  overflow-y: auto;
+}
+.ql-snow .ql-picker.ql-size {
+  width: 70px;
+}

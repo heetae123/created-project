@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /_next/
+Disallow: /api/
+
+# Host
+Host: https://maiptns.com
+
+# Sitemaps
+Sitemap: https://maiptns.com/sitemap.xml

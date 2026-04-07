@@ -1,0 +1,35 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAdmin() {
+      return request.auth != null && request.auth.token.email.lower() == 'admin@mai-entertainment.com';
+    }
+
+    // settings: public read (except sensitive keys), admin-only write
+    match /settings/{key} {
+      allow read: if key != 'admin_password' && key != 'email';
+      allow write: if isAdmin();
+    }
+
+    // board: public read, public create, public views update, admin full update/delete
+    match /board/{postId} {
+      allow read: if true;
+      allow create: if true;
+      allow update: if isAdmin() || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views']));
+      allow delete: if isAdmin();
+    }
+
+    // portfolio: public read, admin-only write
+    match /portfolio/{itemId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // inquiries: public create (contact form), admin read/write/delete
+    match /inquiries/{docId} {
+      allow create: if true;
+      allow read, update, delete: if isAdmin();
+    }
+  }
+}

@@ -1,0 +1,50 @@
+name: 자동 빌드 & 배포
+
+on:
+  # Firebase Functions 웹훅이 이 이벤트를 원격으로 트리거
+  workflow_dispatch:
+  # main 브랜치에 push할 때도 실행
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Node.js 20 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: 루트 의존성 설치
+        run: npm ci
+
+      - name: Functions 의존성 설치
+        run: cd functions && npm ci
+
+      - name: 사이트 빌드 (Next.js + Vite + finalize)
+        run: npm run build
+
+      - name: Firebase Hosting 배포
+        run: npx firebase-tools deploy --only hosting --non-interactive --token "$FIREBASE_TOKEN"
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+      # 배포 후 구글 봇에게 새 사이트맵 알림
+      - name: Google 사이트맵 핑
+        run: |
+          curl -sf "https://www.google.com/ping?sitemap=https://maiptns.com/sitemap.xml" \
+            && echo "✅ Google ping 성공" \
+            || echo "⚠️ Google ping 실패 (무시하고 계속)"
+
+      # 네이버 봇에게도 알림
+      - name: Naver 사이트맵 핑
+        run: |
+          curl -sf "https://searchadvisor.naver.com/xml/ping?sitemap=https://maiptns.com/sitemap.xml" \
+            && echo "✅ Naver ping 성공" \
+            || echo "⚠️ Naver ping 실패 (무시하고 계속)"
