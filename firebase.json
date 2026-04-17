@@ -39,8 +39,8 @@
     ],
     "rewrites": [
       { "source": "/admin/**", "destination": "/admin/index.html" },
-      { "source": "/portfolio/**", "destination": "/portfolio/view" },
-      { "source": "/board/**", "destination": "/board/view" }
+      { "source": "/portfolio/**", "destination": "/portfolio-view" },
+      { "source": "/board/**", "destination": "/board-view" }
     ]
   },
   "functions": {
