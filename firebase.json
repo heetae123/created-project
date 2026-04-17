@@ -3,13 +3,6 @@
     "public": "out",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "cleanUrls": true,
-    "redirects": [
-      {
-        "source": "/www/:path*",
-        "destination": "/:path*",
-        "type": 301
-      }
-    ],
     "headers": [
       {
         "source": "/**",
@@ -31,6 +24,7 @@
       }
     ],
     "redirects": [
+      { "source": "/www/:path*", "destination": "/:path*", "type": 301 },
       { "source": "/about/", "destination": "/about", "type": 301 },
       { "source": "/greeting/", "destination": "/greeting", "type": 301 },
       { "source": "/service/", "destination": "/service", "type": 301 },
@@ -44,7 +38,9 @@
       { "source": "/contact/", "destination": "/contact", "type": 301 }
     ],
     "rewrites": [
-      { "source": "/admin/**", "destination": "/admin/index.html" }
+      { "source": "/admin/**", "destination": "/admin/index.html" },
+      { "source": "/portfolio/**", "destination": "/portfolio/_shell" },
+      { "source": "/board/**", "destination": "/board/_shell" }
     ]
   },
   "functions": {

@@ -12,8 +12,14 @@ type Props = {
 };
 
 export async function generateStaticParams() {
-  const querySnapshot = await getDocs(collection(db, "board"));
-  return querySnapshot.docs.map((doc) => ({ id: doc.id }));
+  try {
+    const querySnapshot = await getDocs(collection(db, "board"));
+    const ids = querySnapshot.docs.map((doc) => ({ id: doc.id }));
+    // _shell은 Firebase Hosting 리라이트 fallback용 페이지
+    return [{ id: '_shell' }, ...ids];
+  } catch {
+    return [{ id: '_shell' }];
+  }
 }
 
 export async function generateMetadata(
