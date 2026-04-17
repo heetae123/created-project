@@ -223,12 +223,14 @@ export default function Portfolio() {
                   >
                     <Link href={`/portfolio/${item.id}`} className="block">
                       <div className="relative aspect-[4/5] overflow-hidden rounded-2xl md:rounded-[1.5rem] mb-4 md:mb-5">
-                        <img
-                          src={item.image || item.thumbnail}
-                          alt={item.title}
-                          loading="lazy"
-                          className="w-full h-full object-cover transition-transform duration-1200 ease-out group-hover:scale-105"
-                        />
+                        {(item.image || item.thumbnail) && (
+                          <img
+                            src={item.image || item.thumbnail}
+                            alt={item.title}
+                            loading="lazy"
+                            className="w-full h-full object-cover transition-transform duration-1200 ease-out group-hover:scale-105"
+                          />
+                        )}
                         {/* Full Size Overlay */}
                         <div className="absolute inset-0 bg-black/5 opacity-0 group-hover:opacity-100 transition-all duration-500 flex items-center justify-center backdrop-blur-[2px]">
                           <div className="w-10 h-10 rounded-full border border-white/40 flex items-center justify-center scale-75 group-hover:scale-100 transition-transform duration-500">

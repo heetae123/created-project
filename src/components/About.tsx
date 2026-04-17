@@ -114,7 +114,7 @@ export default function About() {
                 <button
                   onClick={() => {
                     const link = document.createElement('a');
-                    link.href = '/Mai_Partners_MICE_Introduce_2026_compressed.pdf';
+                    link.href = brochureUrl || '/Mai_Partners_MICE_Introduce_2026_compressed.pdf';
                     link.download = 'MAI_Partners_회사소개서.pdf';
                     document.body.appendChild(link);
                     link.click();

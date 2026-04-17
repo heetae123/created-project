@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
 import { ArrowLeft } from 'lucide-react';
 import { getSettings } from '../lib/api';
 
@@ -30,8 +29,7 @@ interface TeamMember {
 }
 
 export default function TeamInterview({ teamId: propTeamId }: { teamId?: string }) {
-  const searchParams = useSearchParams();
-  const teamId = propTeamId || searchParams.get('teamId') || '';
+  const teamId = propTeamId || '';
   const [members, setMembers] = useState<TeamMember[]>([]);
   const teamName = TEAM_MAP[teamId] || '';
   const teamDesc = TEAM_DESCRIPTIONS[teamId] || '';

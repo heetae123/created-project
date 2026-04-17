@@ -216,10 +216,6 @@ export default function AdminLandingTexts() {
           if (saved.newsHighlight && !saved.newsTitle?.includes('"')) {
             saved.newsTitle = `${saved.newsTitle || ''} "${saved.newsHighlight}"`;
           }
-          if (saved.contactHighlight && !saved.contactTitle?.includes('"')) {
-            const suffix = saved.contactSuffix ?? '';
-            saved.contactTitle = `${saved.contactTitle || ''}\n"${saved.contactHighlight}"${suffix}`;
-          }
           setData({ ...DEFAULTS, ...saved });
         }
       })
