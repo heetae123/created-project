@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import DOMPurify from 'dompurify';
-import { useParams } from 'react-router-dom';
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
 import { ArrowLeft, User, Calendar, Eye, Trash2, X } from 'lucide-react';
@@ -222,8 +221,7 @@ function BlocksRenderer({ blocks }: { blocks: Block[] }) {
 // ── Main Component ────────────────────────────────────────
 
 export default function BoardDetail({ id: propId }: { id?: string }) {
-  const routerParams = useParams();
-  const id = propId || routerParams.id;
+  const id = propId;
   const router = useRouter();
   const [post, setPost] = useState<Post | null>(null);
   const [loading, setLoading] = useState(true);

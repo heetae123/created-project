@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import DOMPurify from 'dompurify';
-import { useParams } from 'react-router-dom';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
@@ -36,8 +35,7 @@ interface PortfolioItem {
 }
 
 export default function PortfolioDetail({ id: propId }: { id?: string }) {
-  const routerParams = useParams();
-  const id = propId || routerParams.id;
+  const id = propId;
   const router = useRouter();
   const [item, setItem] = useState<PortfolioItem | null>(null);
   const [loading, setLoading] = useState(true);
