@@ -6,17 +6,17 @@ import { adminGetSettings, adminSaveSettings } from '../../lib/admin-api';
 import { useToast } from './shared/Toast';
 
 const SERVICES = [
-  { value: 'ceremony', label: '기념행사' },
-  { value: 'promotion', label: '프로모션' },
-  { value: 'sports', label: 'Sports' },
-  { value: 'vip', label: 'VIP 행사' },
-  { value: 'international', label: '국제행사' },
-  { value: 'conference', label: '컨퍼런스' },
-  { value: 'contest', label: '컨테스트' },
-  { value: 'festival', label: '공연 축제' },
-  { value: 'design', label: '디자인' },
-  { value: 'system', label: '시스템 협업' },
-  { value: 'hr', label: '인재협업' },
+  { value: 'ceremony',      label: '기념행사',   group: '기업행사' },
+  { value: 'promotion',     label: '프로모션',   group: '기업행사' },
+  { value: 'sports',        label: 'Sports',     group: '기업행사' },
+  { value: 'vip',           label: 'VIP 행사',   group: '기업행사' },
+  { value: 'international', label: '국제행사',   group: '공공/문화행사' },
+  { value: 'conference',    label: '컨퍼런스',   group: '공공/문화행사' },
+  { value: 'contest',       label: '컨테스트',   group: '공공/문화행사' },
+  { value: 'festival',      label: '공연 축제',  group: '공공/문화행사' },
+  { value: 'design',        label: '디자인',     group: '특화·지원' },
+  { value: 'system',        label: '시스템 협업', group: '특화·지원' },
+  { value: 'hr',            label: '인재협업',   group: '특화·지원' },
 ];
 
 interface ServiceTextData {
@@ -109,8 +109,12 @@ export default function AdminServiceTexts() {
             onChange={e => setSelectedSlug(e.target.value)}
             className="w-full px-[14px] py-[10px] border border-[#E5E7EB] rounded-lg text-sm text-[#111827] bg-white focus:outline-none focus:border-[#F97316] focus:ring-[3px] focus:ring-[rgba(249,115,22,0.1)] cursor-pointer"
           >
-            {SERVICES.map(s => (
-              <option key={s.value} value={s.value}>{s.label}</option>
+            {['기업행사', '공공/문화행사', '특화·지원'].map(group => (
+              <optgroup key={group} label={group}>
+                {SERVICES.filter(s => s.group === group).map(s => (
+                  <option key={s.value} value={s.value}>{s.label}</option>
+                ))}
+              </optgroup>
             ))}
           </select>
         </div>

@@ -383,6 +383,62 @@ export default function AdminServiceImages() {
           </div>
         </div>
       ))}
+
+      {/* ── Service card styles ── */}
+      <div className="mt-6 bg-white border border-gray-200 rounded-xl p-5">
+        <div className="flex items-center gap-2 mb-4">
+          <span className="w-1 h-[18px] bg-orange-500 rounded-sm inline-block" />
+          <span className="font-semibold text-gray-900">서비스 카드 스타일</span>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1.5">카테고리 제목 크기 (px)</label>
+            <input
+              type="number" min={16} max={60}
+              value={svcStyles.catTitleSize}
+              onChange={e => setSvcStyles(s => ({ ...s, catTitleSize: Number(e.target.value) }))}
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1.5">카테고리 제목 색상</label>
+            <div className="flex gap-2">
+              <input type="color" value={svcStyles.catTitleColor} onChange={e => setSvcStyles(s => ({ ...s, catTitleColor: e.target.value }))} className="w-10 h-9 rounded border border-gray-200 cursor-pointer" />
+              <input type="text" value={svcStyles.catTitleColor} onChange={e => setSvcStyles(s => ({ ...s, catTitleColor: e.target.value }))} className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm font-mono" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1.5">서비스명 크기 (px)</label>
+            <input
+              type="number" min={12} max={40}
+              value={svcStyles.svcNameSize}
+              onChange={e => setSvcStyles(s => ({ ...s, svcNameSize: Number(e.target.value) }))}
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1.5">서비스명 색상</label>
+            <div className="flex gap-2">
+              <input type="color" value={svcStyles.svcNameColor} onChange={e => setSvcStyles(s => ({ ...s, svcNameColor: e.target.value }))} className="w-10 h-9 rounded border border-gray-200 cursor-pointer" />
+              <input type="text" value={svcStyles.svcNameColor} onChange={e => setSvcStyles(s => ({ ...s, svcNameColor: e.target.value }))} className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm font-mono" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1.5">서비스 설명 색상</label>
+            <div className="flex gap-2">
+              <input type="color" value={svcStyles.svcDescColor} onChange={e => setSvcStyles(s => ({ ...s, svcDescColor: e.target.value }))} className="w-10 h-9 rounded border border-gray-200 cursor-pointer" />
+              <input type="text" value={svcStyles.svcDescColor} onChange={e => setSvcStyles(s => ({ ...s, svcDescColor: e.target.value }))} className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm font-mono" />
+            </div>
+          </div>
+        </div>
+        <button
+          onClick={handleSaveStyles}
+          disabled={savingStyles}
+          className="mt-4 inline-flex items-center gap-1.5 px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-lg transition-colors disabled:opacity-50"
+        >
+          {savingStyles ? '저장 중...' : '스타일 저장'}
+        </button>
+      </div>
     </div>
   );
 }

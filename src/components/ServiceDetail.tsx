@@ -3,31 +3,38 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
 import { ArrowLeft, CheckCircle2 } from 'lucide-react';
-import { getSettings } from '../lib/api';
+import { getSettings, getPortfolioList } from '../lib/api';
 
 const SLUG_TO_SUBCATEGORY: Record<string, string> = {
-  ceremony: '기념식 행사', foundation: '창립 행사', sports: '체육대회 행사',
-  employee: '임직원 행사', convention: '컨벤션 행사', festival: '공연 축제 행사',
-  public: '관공서 기관 행사', promotion: '프로모션 행사', vip: 'VIP 행사',
-  game: '게임행사', system: '시스템 협업', hr: '인재 협업',
+  ceremony: '기념행사',
+  promotion: '프로모션',
+  sports: 'Sports',
+  vip: 'VIP 행사',
+  international: '국제행사',
+  conference: '컨퍼런스',
+  contest: '컨테스트',
+  festival: '공연 축제',
+  design: '디자인',
+  system: '시스템 협업',
+  hr: '인재협업',
 };
 
 const serviceData: Record<string, any> = {
-  ceremony: { title: "기념식 행사", description: "기업의 비전과 가치를 공유하는 임직원 행사", fallbackImg: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80" },
-  foundation: { title: "기념행사", description: "새로운 도약을 다짐하는 의미 있는 창립 기념 행사", fallbackImg: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&q=80" },
-  sports: { title: "프로모션", description: "임직원의 단합과 활력을 불어넣는 체육대회", fallbackImg: "https://images.unsplash.com/photo-1533443190583-424f9342e475?auto=format&fit=crop&q=80" },
-  employee: { title: "Sports", description: "소통과 화합을 위한 맞춤형 임직원 워크샵 및 행사", fallbackImg: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&q=80" },
-  convention: { title: "국제행사", description: "성공적인 비즈니스를 위한 전문적인 컨벤션 기획", fallbackImg: "https://images.unsplash.com/photo-1540575861501-7c00117fbade?auto=format&fit=crop&q=80" },
-  festival: { title: "컨퍼런스", description: "대중의 눈과 귀를 사로잡는 화려한 공연 및 축제", fallbackImg: "https://images.unsplash.com/photo-1459749411177-042180ce673c?auto=format&fit=crop&q=80" },
-  public: { title: "컨테스트", description: "신뢰와 품격을 바탕으로 한 관공서 및 공공기관 행사", fallbackImg: "https://images.unsplash.com/photo-1517457373958-b7bdd458ad20?auto=format&fit=crop&q=80" },
-  promotion: { title: "공연 축제", description: "브랜드 가치를 극대화하는 타겟 맞춤형 프로모션", fallbackImg: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80" },
-  vip: { title: "· 디자인", description: "최고의 예우를 갖춘 프라이빗 VIP 초청 행사", fallbackImg: "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&q=80" },
+  ceremony: { title: "기념행사", description: "송년회, 창립행사, 신년회, 준공식, 협약식, 워크숍, 시상식 등 기업 기념 행사 기획", fallbackImg: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80" },
+  promotion: { title: "프로모션", description: "브랜드 가치를 극대화하는 타겟 맞춤형 프로모션 기획", fallbackImg: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&q=80" },
+  sports: { title: "Sports", description: "기업 체육대회, 단합행사, 팀빌딩, 레크레이션, e-sports 등", fallbackImg: "https://images.unsplash.com/photo-1533443190583-424f9342e475?auto=format&fit=crop&q=80" },
+  vip: { title: "VIP 행사", description: "최고의 예우를 갖춘 VIP 골프행사, VIP 의전 등 프라이빗 서비스", fallbackImg: "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?auto=format&fit=crop&q=80" },
+  international: { title: "국제행사", description: "인센티브 투어, 국제세미나, 포럼 등 글로벌 행사 기획", fallbackImg: "https://images.unsplash.com/photo-1540575861501-7c00117fbade?auto=format&fit=crop&q=80" },
+  conference: { title: "컨퍼런스", description: "국내 컨벤션, 세미나, 포럼, 사업설명회, 정기총회 등", fallbackImg: "https://images.unsplash.com/photo-1505373877841-8d25f7d46678?auto=format&fit=crop&q=80" },
+  contest: { title: "컨테스트", description: "기술 경연대회, 학술제, 경진대회 등", fallbackImg: "https://images.unsplash.com/photo-1517457373958-b7bdd458ad20?auto=format&fit=crop&q=80" },
+  festival: { title: "공연 축제", description: "공연 기획, 콘서트, 지역축제, 관공서 기관 행사 등", fallbackImg: "https://images.unsplash.com/photo-1459749411177-042180ce673c?auto=format&fit=crop&q=80" },
+  design: { title: "디자인", description: "행사 브랜딩, 공간 디자인, 그래픽 제작 등 비주얼 솔루션", fallbackImg: "https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&q=80" },
   system: { title: "시스템 협업", description: "최첨단 음향, 조명, 영상 시스템 구축 및 운영", fallbackImg: "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&q=80" },
-  hr: { title: "인재 협업", description: "행사의 격을 높이는 전문 MC, 모델, 스태프 섭외", fallbackImg: "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&q=80" },
+  hr: { title: "인재협업", description: "MC·모델·퍼포머 등 행사에 적합한 전문 인력을 매칭합니다", fallbackImg: "https://images.unsplash.com/photo-1501281668745-f7f57925c3b4?auto=format&fit=crop&q=80" },
 };
 
 interface PortfolioItem {
-  id: number;
+  id: string;
   title: string;
   subcategory?: string;
   image?: string;
@@ -42,7 +49,7 @@ export default function ServiceDetail({ id: propId }: { id?: string }) {
   const [relatedItems, setRelatedItems] = useState<PortfolioItem[]>([]);
   const [serviceImage, setServiceImage] = useState<string | null>(null);
   const [serviceImagePosition, setServiceImagePosition] = useState<string>('center center');
-  const [serviceText, setServiceText] = useState<{ overview?: string; points?: string[] } | null>(null);
+  const [serviceText, setServiceText] = useState<{ overview?: string; points?: string[]; pointsColor?: string; pointsTextColor?: string } | null>(null);
 
   useEffect(() => {
     if (!service) { router.push('/service'); return; }
@@ -73,7 +80,7 @@ export default function ServiceDetail({ id: propId }: { id?: string }) {
     }
     // 관련 포트폴리오 가져오기
     if (sub) {
-      getSettings('portfolio')
+      getPortfolioList()
         .then((data: PortfolioItem[]) => {
           if (Array.isArray(data)) {
             const matched = data.filter(p => p.subcategory === sub);
@@ -130,8 +137,8 @@ export default function ServiceDetail({ id: propId }: { id?: string }) {
             </h3>
             <ul className="space-y-4">
               {(serviceText?.points || ["맞춤형 컨셉 기획 및 연출", "전문 인력 및 시스템 투입", "체계적인 위기 관리 및 안전 대책", "결과 보고 및 사후 피드백 제공"]).map((point, idx) => (
-                <li key={idx} className="flex items-center space-x-4 text-zinc-600 font-bold">
-                  <CheckCircle2 className="w-5 h-5 text-[#F97316]" />
+                <li key={idx} className="flex items-center space-x-4 font-bold" style={{ color: serviceText?.pointsTextColor || '#52525b' }}>
+                  <CheckCircle2 className="w-5 h-5 shrink-0" style={{ color: serviceText?.pointsColor || '#F97316' }} />
                   <span>{point}</span>
                 </li>
               ))}
