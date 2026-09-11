@@ -1,25 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { getBoardList } from '../lib/api';
+import type { BoardPublicPost as Post } from '../lib/api-server';
 
-interface Post {
-  id: number;
-  isNotice: boolean;
-  category?: string;
-  title: string;
-  author: string;
-  date: string;
-  views: number;
-  thumbnail?: string;
-  pinned?: boolean;
-}
-
-export default function Board() {
-
-  const router = useRouter();
-  const [allBoardPosts, setAllBoardPosts] = useState<Post[]>([]);
+export default function Board({ initialPosts = [] }: { initialPosts?: Post[] }) {
+  const [allBoardPosts, setAllBoardPosts] = useState<Post[]>(initialPosts);
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState('');
   const [searchInput, setSearchInput] = useState('');
@@ -28,7 +15,7 @@ export default function Board() {
 
   useEffect(() => {
     getBoardList(1, 9999, '')
-      .then(data => setAllBoardPosts(data.items || []))
+      .then(data => setAllBoardPosts((data.items || []) as Post[]))
       .catch(() => {});
   }, []);
 
@@ -90,14 +77,14 @@ export default function Board() {
             >
               Notice & News
             </motion.span>
-            <motion.h2
+            <motion.h1
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               className="text-3xl md:text-5xl font-black text-zinc-900"
             >
               게시판
-            </motion.h2>
+            </motion.h1>
           </div>
 
           {/* Filter Tabs */}
@@ -172,8 +159,7 @@ export default function Board() {
                     return (
                       <tr
                         key={post.id}
-                        onClick={() => router.push(`/board/${post.id}`)}
-                        className="group hover:bg-zinc-50 transition-colors border-t border-zinc-50 cursor-pointer"
+                        className="group hover:bg-zinc-50 transition-colors border-t border-zinc-50"
                       >
                         <td className="py-6 px-4">
                           <span className="text-zinc-400 font-medium">{(page - 1) * limit + idx + 1}</span>
@@ -184,12 +170,15 @@ export default function Board() {
                           </span>
                         </td>
                         <td className="py-6 px-4">
-                          <span className="text-zinc-800 font-bold group-hover:text-[#F97316] transition-colors line-clamp-1">
+                          <Link
+                            href={`/board/${post.id}`}
+                            className="block text-zinc-800 font-bold group-hover:text-[#F97316] transition-colors line-clamp-1"
+                          >
                             {post.pinned && (
                               <span className="inline-block mr-1.5 px-1.5 py-0.5 text-[9px] font-black bg-[#F97316] text-white rounded align-middle">고정</span>
                             )}
                             {post.title}
-                          </span>
+                          </Link>
                         </td>
                         <td className="py-6 px-4 text-center text-zinc-500 font-medium">{post.author}</td>
                         <td className="py-6 px-4 text-center text-zinc-400 font-medium">{post.date}</td>
@@ -218,10 +207,10 @@ export default function Board() {
                     : 'bg-blue-50 text-blue-500';
                 const badgeLabel = cat === 'notice' ? 'NOTICE' : cat === 'certificate' ? 'CERTIFICATE' : 'NEWS';
                 return (
-                  <div
+                  <Link
                     key={post.id}
-                    onClick={() => router.push(`/board/${post.id}`)}
-                    className="py-6 border-b border-zinc-100 space-y-3"
+                    href={`/board/${post.id}`}
+                    className="block py-6 border-b border-zinc-100 space-y-3"
                   >
                     <div className="flex items-center justify-between">
                       <span className={`px-2.5 py-1 text-[10px] font-bold rounded-full ${badgeClass}`}>
@@ -240,7 +229,7 @@ export default function Board() {
                       <span className="w-[1px] h-2.5 bg-zinc-200" />
                       <span>조회수 {post.views}</span>
                     </div>
-                  </div>
+                  </Link>
                 );
               })
             )}

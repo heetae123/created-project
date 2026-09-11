@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import BoardListClient from './BoardListClient';
-import { getSeoSettings } from '@/src/lib/api-server';
+import { getBoardPostsServer, getSeoSettings } from '@/src/lib/api-server';
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getSeoSettings();
@@ -23,4 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function BoardPage() { return <BoardListClient />; }
+export default async function BoardPage() {
+  const initialPosts = await getBoardPostsServer().catch(() => []);
+  return <BoardListClient initialPosts={initialPosts} />;
+}

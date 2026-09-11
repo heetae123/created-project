@@ -1,50 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import DOMPurify from 'dompurify';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
 import { ArrowLeft, User, Calendar, Eye, Trash2, X } from 'lucide-react';
 import { getBoardPost, deleteBoardPost } from '../lib/api';
-
-// Allow YouTube/Vimeo iframes and set links to open in new tab — registered once at module load
-DOMPurify.addHook('afterSanitizeAttributes', (node) => {
-  if (node.tagName === 'A') {
-    node.setAttribute('target', '_blank');
-    node.setAttribute('rel', 'noopener noreferrer');
-    return;
-  }
-  if (node.tagName !== 'IFRAME') return;
-  const src = node.getAttribute('src') || '';
-  if (
-    !src.startsWith('https://www.youtube.com/embed/') &&
-    !src.startsWith('https://player.vimeo.com/video/')
-  ) {
-    node.parentNode?.removeChild(node);
-  }
-});
+import type { BoardContentBlock as Block, BoardPublicPost as Post } from '../lib/api-server';
 
 const SANITIZE_CONFIG = {
   ADD_TAGS: ['iframe'],
   ADD_ATTR: ['allowfullscreen', 'frameborder', 'allow', 'referrerpolicy', 'src', 'class', 'width', 'height', 'style', 'target', 'rel'],
 };
 
-interface TextBlock {
-  type: 'text';
-  html: string;
-}
-
-interface ImagesBlock {
-  type: 'images';
-  urls: string[];
-  caption: string;
-}
-
-interface VideoBlock {
-  type: 'video';
-  url: string;
-  caption: string;
-}
-
-type Block = TextBlock | ImagesBlock | VideoBlock;
+type VideoBlock = Extract<Block, { type: 'video' }>;
 
 function getEmbedUrl(url: string): string | null {
   if (!url) return null;
@@ -87,18 +55,53 @@ function convertVideoUrlsToIframes(html: string): string {
   return result;
 }
 
-interface Post {
-  id: number;
-  title: string;
-  author: string;
-  date: string;
-  views: number;
-  isNotice: boolean;
-  category?: string;
-  content: string;
-  blocks?: Block[];
-  password?: string;
-  thumbnail?: string;
+function plainText(value: string): string {
+  return value
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+let purifierConfigured = false;
+
+function sanitizeRichHtml(html: string): string {
+  if (!purifierConfigured) {
+    DOMPurify.addHook('afterSanitizeAttributes', (node) => {
+      if (node.tagName === 'A') {
+        node.setAttribute('target', '_blank');
+        node.setAttribute('rel', 'noopener noreferrer');
+        return;
+      }
+      if (node.tagName !== 'IFRAME') return;
+      const src = node.getAttribute('src') || '';
+      if (
+        !src.startsWith('https://www.youtube.com/embed/') &&
+        !src.startsWith('https://player.vimeo.com/video/')
+      ) {
+        node.parentNode?.removeChild(node);
+      }
+    });
+    purifierConfigured = true;
+  }
+  return DOMPurify.sanitize(convertVideoUrlsToIframes(html), SANITIZE_CONFIG);
+}
+
+function RichText({ html, className }: { html: string; className: string }) {
+  const [sanitizedHtml, setSanitizedHtml] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSanitizedHtml(sanitizeRichHtml(html));
+  }, [html]);
+
+  if (sanitizedHtml === null) {
+    return <div className={`${className} whitespace-pre-wrap`}>{plainText(html)}</div>;
+  }
+
+  return <div className={className} dangerouslySetInnerHTML={{ __html: sanitizedHtml }} />;
 }
 
 // ── Lightbox ─────────────────────────────────────────────
@@ -146,12 +149,10 @@ function BlocksRenderer({ blocks }: { blocks: Block[] }) {
           const html = block.html?.trim();
           if (!html || html === '<p><br></p>') return null;
           return (
-            <div
+            <RichText
               key={index}
               className="text-zinc-700 leading-relaxed text-lg prose prose-zinc max-w-none mb-6 ql-rendered"
-              dangerouslySetInnerHTML={{
-                __html: DOMPurify.sanitize(convertVideoUrlsToIframes(html), SANITIZE_CONFIG),
-              }}
+              html={html}
             />
           );
         }
@@ -220,19 +221,28 @@ function BlocksRenderer({ blocks }: { blocks: Block[] }) {
 
 // ── Main Component ────────────────────────────────────────
 
-export default function BoardDetail({ id: propId }: { id?: string }) {
+export default function BoardDetail({
+  id: propId,
+  initialPost = null,
+}: {
+  id?: string;
+  initialPost?: Post | null;
+}) {
   const id = propId;
   const router = useRouter();
-  const [post, setPost] = useState<Post | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [post, setPost] = useState<Post | null>(initialPost);
+  const [loading, setLoading] = useState(!initialPost);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [deleteError, setDeleteError] = useState('');
 
-  const isAdmin = localStorage.getItem('isAdmin') === 'true';
-
+  useEffect(() => {
+    setIsAdmin(localStorage.getItem('isAdmin') === 'true');
+  }, []);
 
   useEffect(() => {
+    if (!id) return;
     getBoardPost(String(id))
       .then(data => { if (data) setPost(data as Post); else setPost(null); })
       .catch(() => setPost(null))
@@ -310,15 +320,16 @@ export default function BoardDetail({ id: propId }: { id?: string }) {
   return (
     <section className="pt-32 pb-24 md:pt-40 md:pb-32 bg-white min-h-screen">
       <div className="max-w-4xl mx-auto px-6 md:px-12">
-        <motion.button
+        <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          onClick={() => router.push('/board')}
           className="flex items-center gap-2 text-zinc-400 hover:text-zinc-900 transition-colors mb-8 group"
         >
-          <ArrowLeft size={18} className="transition-transform group-hover:-translate-x-1" />
-          <span className="text-sm font-medium">목록으로 돌아가기</span>
-        </motion.button>
+          <Link href="/board" className="inline-flex items-center gap-2">
+            <ArrowLeft size={18} className="transition-transform group-hover:-translate-x-1" />
+            <span className="text-sm font-medium">목록으로 돌아가기</span>
+          </Link>
+        </motion.div>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -368,11 +379,9 @@ export default function BoardDetail({ id: propId }: { id?: string }) {
             {hasBlocks ? (
               <BlocksRenderer blocks={post.blocks!} />
             ) : (
-              <div
+              <RichText
                 className="text-zinc-700 leading-relaxed text-lg prose prose-zinc max-w-none ql-rendered"
-                dangerouslySetInnerHTML={{
-                  __html: DOMPurify.sanitize(convertVideoUrlsToIframes(post.content), SANITIZE_CONFIG),
-                }}
+                html={post.content}
               />
             )}
           </div>
@@ -380,12 +389,12 @@ export default function BoardDetail({ id: propId }: { id?: string }) {
 
         {/* Bottom Buttons */}
         <div className="flex justify-center gap-4 mt-12">
-          <button
-            onClick={() => router.push('/board')}
+          <Link
+            href="/board"
             className="px-10 py-4 bg-[#F97316] hover:bg-[#EA580C] text-white font-bold rounded-full transition-all shadow-lg shadow-[#F97316]/20"
           >
             목록보기
-          </button>
+          </Link>
           {isAdmin && (
             <button
               onClick={() => setShowDeleteModal(true)}

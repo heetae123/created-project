@@ -64,7 +64,6 @@ export default function Service() {
 
   const [serviceImages, setServiceImages] = useState<Record<string, any>>({});
   const [svcStyles, setSvcStyles] = useState<ServiceStyles>(DEFAULT_SERVICE_STYLES);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
@@ -74,9 +73,7 @@ export default function Service() {
       getSettings('service_styles').then((data: ServiceStyles | null) => {
         if (data && typeof data === 'object') setSvcStyles({ ...DEFAULT_SERVICE_STYLES, ...data });
       }),
-    ])
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    ]).catch(() => {});
   }, []);
 
   const getImageUrl = (slug: string, fallback?: string) => {
@@ -104,7 +101,7 @@ export default function Service() {
             >
               Our Service
             </motion.span>
-            <motion.h2
+            <motion.h1
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -112,7 +109,7 @@ export default function Service() {
             >
               전문적인 기획으로 <br />
               완벽한 순간을 만듭니다
-            </motion.h2>
+            </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
@@ -124,21 +121,6 @@ export default function Service() {
             </motion.p>
           </div>
 
-          {loading ? (
-            <div className="space-y-16 animate-pulse">
-              {[0, 1, 2].map((i) => (
-                <div key={i}>
-                  <div className="h-7 w-28 bg-zinc-200 rounded mb-2" />
-                  <div className="h-4 w-52 bg-zinc-200 rounded mb-8" />
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                    {[0, 1, 2, 3].map((j) => (
-                      <div key={j} className="bg-zinc-200 rounded-2xl min-h-[240px]" />
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
           <div className="space-y-16">
             {categories.map((cat, idx) => (
               <motion.div
@@ -214,7 +196,6 @@ export default function Service() {
               </motion.div>
             ))}
           </div>
-          )}
         </div>
       </section>
     </div>

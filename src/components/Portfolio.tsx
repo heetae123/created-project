@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, useMotionValue, useSpring } from 'motion/react';
 import Link from 'next/link';
-import { useSearchParams } from 'next/navigation';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { getPortfolioList } from '../lib/api';
+import type { PortfolioPublicItem } from '../lib/api-server';
 
 const MAIN_CATEGORIES = ['행사스케치', '아이디어 노트', '행사프로그램'];
 
@@ -14,23 +14,10 @@ const SUB_CATEGORIES = [
   '디자인', '시스템 협업', '인재협업'
 ];
 
-interface PortfolioItem {
-  id: number;
-  category: string;
-  subcategory?: string;
-  title: string;
-  thumbnail?: string;
-  image?: string;
-}
-
-export default function Portfolio() {
-
-  const searchParams = useSearchParams();
-  const [items, setItems] = useState<PortfolioItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [activeMain, setActiveMain] = useState<string>(
-    searchParams.get('category') ?? MAIN_CATEGORIES[0]
-  );
+export default function Portfolio({ initialItems = [] }: { initialItems?: PortfolioPublicItem[] }) {
+  const [items, setItems] = useState<PortfolioPublicItem[]>(initialItems);
+  const [loading, setLoading] = useState(initialItems.length === 0);
+  const [activeMain, setActiveMain] = useState<string>(MAIN_CATEGORIES[0]);
   const [activeSub, setActiveSub] = useState('전체');
   
   const containerRef = useRef<HTMLDivElement>(null);
@@ -40,10 +27,13 @@ export default function Portfolio() {
   const springX = useSpring(x, { stiffness: 60, damping: 25 });
 
   useEffect(() => {
+    const category = new URLSearchParams(window.location.search).get('category');
+    if (category && MAIN_CATEGORIES.includes(category)) setActiveMain(category);
+
     getPortfolioList()
       .then(data => {
         if (Array.isArray(data) && data.length > 0) {
-          setItems(data);
+          setItems(data as PortfolioPublicItem[]);
         }
       })
       .catch(() => {})
@@ -100,7 +90,7 @@ export default function Portfolio() {
             >
               Portfolio
             </motion.span>
-            <motion.h2
+            <motion.h1
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -110,7 +100,7 @@ export default function Portfolio() {
               <span className="inline-block py-1 text-zinc-900 italic uppercase">
                 특별한 순간들
               </span>
-            </motion.h2>
+            </motion.h1>
           </div>
 
           {/* Main Category Tabs */}

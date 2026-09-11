@@ -8,7 +8,8 @@
     "dev": "concurrently -n next,vite -c cyan,magenta \"next dev --port 3000\" \"vite --port 3001\"",
     "build:user": "next build",
     "build:admin": "vite build",
-    "build": "npm run build:user && npm run build:admin && node finalize-build.cjs",
+    "build": "npm run build:user && npm run build:admin && node finalize-build.cjs && node scripts/generate-content-manifest.mjs out/content-version.json",
+    "test:seo": "node scripts/audit-seo.mjs",
     "start": "next start",
     "lint": "tsc --noEmit"
   },

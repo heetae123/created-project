@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import PortfolioListClient from './PortfolioListClient';
-import { getSeoSettings } from '@/src/lib/api-server';
+import { getPortfolioItemsServer, getSeoSettings } from '@/src/lib/api-server';
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getSeoSettings();
@@ -23,4 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function PortfolioPage() { return <PortfolioListClient />; }
+export default async function PortfolioPage() {
+  const initialItems = await getPortfolioItemsServer().catch(() => []);
+  return <PortfolioListClient initialItems={initialItems} />;
+}

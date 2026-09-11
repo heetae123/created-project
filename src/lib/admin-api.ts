@@ -37,7 +37,7 @@ export async function adminSaveSettings(key: string, value: any): Promise<void> 
 // Board
 // =========================================================
 export async function toggleBoardPin(id: string, pinned: boolean): Promise<void> {
-  await updateDoc(doc(db, 'board', String(id)), { pinned });
+  await updateDoc(doc(db, 'board', String(id)), { pinned, updatedAt: new Date().toISOString() });
 }
 
 export async function getBoardPosts(): Promise<any[]> {
@@ -65,6 +65,7 @@ export async function saveBoardPost(data: {
       thumbnail: data.thumbnail,
       isNotice: data.isNotice,
       category: data.category,
+      updatedAt: new Date().toISOString(),
     });
   } else {
     const id = Date.now();
@@ -81,6 +82,7 @@ export async function saveBoardPost(data: {
       views: 0,
       date: (() => { const d = new Date(); return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`; })(),
       createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     });
   }
 }
@@ -143,4 +145,3 @@ export async function uploadToCloudinary(file: File, folder = 'mai-services', re
   const data = await res.json();
   return data.secure_url;
 }
-

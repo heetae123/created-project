@@ -1,8 +1,12 @@
-import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
-import { db } from '@/src/lib/firebase';
-import { Metadata, ResolvingMetadata } from 'next';
+import { Metadata } from 'next';
 import PortfolioClient from './PortfolioClient';
-import { getSeoSettings } from '@/src/lib/api-server';
+import {
+  getPortfolioItemServer,
+  getPortfolioItemsServer,
+  getSeoSettings,
+  plainTextFromHtml,
+  type PortfolioPublicItem,
+} from '@/src/lib/api-server';
 
 const SITE_NAME = "MAI PARTNERS";
 const SITE_URL = "https://maiptns.com";
@@ -13,41 +17,50 @@ type Props = {
 
 export async function generateStaticParams() {
   try {
-    const querySnapshot = await getDocs(collection(db, "portfolio"));
-    return querySnapshot.docs.map((doc) => ({ id: doc.id }));
+    const items = await getPortfolioItemsServer();
+    return items.map((item) => ({ id: item.id }));
   } catch {
     return [];
   }
 }
 
+function getDescription(item: PortfolioPublicItem): string {
+  const blockText = item.blocks
+    ?.filter((block) => block.type === 'text' && block.content)
+    .map((block) => plainTextFromHtml(block.content || ''))
+    .join(' ');
+  const summary = plainTextFromHtml(item.description || blockText || '');
+  const fallback = item.client
+    ? `${item.title} - ${item.client} | 마이파트너스 이벤트 포트폴리오`
+    : `${item.title} | 마이파트너스 이벤트 포트폴리오`;
+  return (summary || fallback).slice(0, 155);
+}
+
 export async function generateMetadata(
   { params }: Props,
-  parent: ResolvingMetadata
 ): Promise<Metadata> {
   const { id } = await params;
-  const [docSnap, seo] = await Promise.all([
-    getDoc(doc(db, "portfolio", id)),
+  const [item, seo] = await Promise.all([
+    getPortfolioItemServer(id),
     getSeoSettings(),
   ]);
 
-  if (!docSnap.exists()) return { title: { absolute: `포트폴리오 | ${SITE_NAME}` }, alternates: { canonical: `${SITE_URL}/portfolio` } };
+  if (!item) return { title: { absolute: `포트폴리오 | ${SITE_NAME}` }, alternates: { canonical: `${SITE_URL}/portfolio` } };
 
-  const item = docSnap.data();
   const title = `${item.title} - 포트폴리오 | ${SITE_NAME}`;
-  const description = item.client
-    ? `${item.title} - ${item.client} | 마이파트너스 이벤트 포트폴리오`
-    : `${item.title} | 마이파트너스 이벤트 포트폴리오`;
+  const description = getDescription(item);
   const image = item.image || item.thumbnail || seo.ogImage;
+  const canonical = `${SITE_URL}/portfolio/${encodeURIComponent(item.id)}`;
 
   return {
     title: { absolute: title },
     description,
-    alternates: { canonical: `${SITE_URL}/portfolio/${encodeURIComponent(id)}` },
+    alternates: { canonical },
     openGraph: {
       title,
       description,
       images: [image],
-      url: `${SITE_URL}/portfolio/${encodeURIComponent(id)}`,
+      url: canonical,
       type: 'article',
     },
     twitter: {
@@ -61,37 +74,26 @@ export async function generateMetadata(
 
 export default async function PortfolioPage({ params }: Props) {
   const { id } = await params;
-
-  let jsonLd: object | null = null;
-
-  try {
-    const [docSnap, seo] = await Promise.all([
-      getDoc(doc(db, "portfolio", id)),
-      getSeoSettings(),
-    ]);
-    if (docSnap.exists()) {
-      const item = docSnap.data();
-      const description = item.client
-        ? `${item.title} - ${item.client} | 마이파트너스 이벤트 포트폴리오`
-        : `${item.title} | 마이파트너스 이벤트 포트폴리오`;
-
-      jsonLd = {
-        '@context': 'https://schema.org',
-        '@type': 'Article',
-        headline: item.title,
-        description,
-        image: item.image || item.thumbnail || seo.ogImage,
-        url: `${SITE_URL}/portfolio/${id}`,
-        publisher: {
-          '@type': 'Organization',
-          name: SITE_NAME,
-          url: SITE_URL,
-        },
-      };
-    }
-  } catch {
-    // 빌드 시 Firestore 접근 실패 시 클라이언트 렌더링으로 fallback
-  }
+  const [item, seo] = await Promise.all([
+    getPortfolioItemServer(id).catch(() => null),
+    getSeoSettings(),
+  ]);
+  const canonical = item ? `${SITE_URL}/portfolio/${encodeURIComponent(item.id)}` : `${SITE_URL}/portfolio`;
+  const jsonLd = item ? {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: item.title,
+    description: getDescription(item),
+    image: item.image || item.thumbnail || seo.ogImage,
+    url: canonical,
+    datePublished: item.createdAt,
+    dateModified: item.updatedAt || item.createdAt,
+    publisher: {
+      '@type': 'Organization',
+      name: SITE_NAME,
+      url: SITE_URL,
+    },
+  } : null;
 
   return (
     <>
@@ -101,7 +103,7 @@ export default async function PortfolioPage({ params }: Props) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       )}
-      <PortfolioClient />
+      <PortfolioClient id={item?.id || id} initialItem={item} />
     </>
   );
 }

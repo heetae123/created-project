@@ -1,4 +1,3 @@
 "use client";
-import dynamic from 'next/dynamic';
-const Service = dynamic(() => import('@/src/components/Service'), { ssr: false });
+import Service from '@/src/components/Service';
 export default function ServiceListClient() { return <Service />; }

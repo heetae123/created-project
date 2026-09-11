@@ -4,11 +4,11 @@ import Logo from './Logo';
 import { getSettings } from '../lib/api';
 
 const defaultInfo = {
-  companyName: '마이파트너스',
-  address: '서울특별시 강남구 테헤란로 123, 넥서스 타워 15층',
-  phone: '02-1234-5678',
-  email: 'contact@mai-event.com',
-  bizLicense: '123-45-67890',
+  companyName: '주식회사 마이파트너스',
+  address: '경기도 용인시 기흥구 중부대로 184, 힉스유타워 A동 513호',
+  phone: '050-6192-8300',
+  email: 'info@maiptns.com',
+  bizLicense: '442-88-03209',
 };
 
 export default function Footer() {

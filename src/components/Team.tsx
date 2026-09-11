@@ -56,7 +56,7 @@ export default function Team() {
           >
             {texts.teamLabel ?? 'Our Team'}
           </motion.span>
-          <motion.h2
+          <motion.h1
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -65,7 +65,7 @@ export default function Team() {
             style={{ fontSize: texts.teamTitleSize || 48 }}
           >
             <HighlightText text={texts.teamTitle ?? '최고의 "전문가"들이 함께합니다'} color={texts.teamColor || '#F97316'} />
-          </motion.h2>
+          </motion.h1>
           <p className="text-zinc-400 max-w-2xl mx-auto" style={{ fontSize: texts.teamDescSize || 16 }}>
             {texts.teamDesc ?? '마이파트너스의 각 분야 전문가들이 모여 당신의 상상을 현실로 만듭니다.'}
           </p>

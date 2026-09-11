@@ -85,7 +85,7 @@ export default async function ServicePage({ params }: Props) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       )}
-      <ServiceClient />
+      <ServiceClient id={id} />
     </>
   );
 }

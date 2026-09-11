@@ -1,4 +1,3 @@
 "use client";
-import dynamic from 'next/dynamic';
-const About = dynamic(() => import('@/src/components/About'), { ssr: false });
+import About from '@/src/components/About';
 export default function AboutClient() { return <About />; }

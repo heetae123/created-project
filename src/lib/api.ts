@@ -142,11 +142,18 @@ export async function getPortfolioItem(id: string) {
 }
 
 export async function savePortfolioItem(id: string, data: any) {
-  await setDoc(doc(db, 'portfolio', id), data);
+  const docRef = doc(db, 'portfolio', id);
+  const existing = await getDoc(docRef);
+  const now = new Date().toISOString();
+  await setDoc(docRef, {
+    ...data,
+    ...(existing.exists() ? {} : { createdAt: now }),
+    updatedAt: now,
+  }, { merge: true });
 }
 
 export async function updatePortfolioOrder(id: string, sortOrder: number) {
-  await updateDoc(doc(db, 'portfolio', id), { sortOrder });
+  await updateDoc(doc(db, 'portfolio', id), { sortOrder, updatedAt: new Date().toISOString() });
 }
 
 export async function deletePortfolioItem(id: string) {

@@ -77,8 +77,8 @@ export async function generateMetadata(): Promise<Metadata> {
       'mobile-web-app-capable': 'yes',
       'apple-mobile-web-app-capable': 'yes',
       'apple-mobile-web-app-title': 'MAI PARTNERS',
-      'geo.region': 'KR-11',
-      'geo.placename': 'Seoul',
+      'geo.region': 'KR-41',
+      'geo.placename': 'Yongin-si',
     },
   };
 }
@@ -102,13 +102,16 @@ function OrganizationSchema({ ogImage }: { ogImage: string }) {
     'contactPoint': {
       '@type': 'ContactPoint',
       'contactType': 'customer service',
+      'telephone': '050-6192-8300',
       'email': 'info@maiptns.com',
       'areaServed': { '@type': 'Country', 'name': 'KR' },
       'availableLanguage': ['Korean', 'English'],
     },
     'address': {
       '@type': 'PostalAddress',
-      'addressLocality': '서울',
+      'streetAddress': '중부대로 184, 힉스유타워 A동 513호',
+      'addressLocality': '용인시 기흥구',
+      'addressRegion': '경기도',
       'addressCountry': 'KR',
     },
     'areaServed': { '@type': 'Country', 'name': 'South Korea' },
@@ -176,9 +179,13 @@ function LocalBusinessSchema({ ogImage }: { ogImage: string }) {
     'name': 'MAI PARTNERS (마이파트너스)',
     'image': ogImage,
     'url': 'https://maiptns.com',
+    'telephone': '050-6192-8300',
+    'email': 'info@maiptns.com',
     'address': {
       '@type': 'PostalAddress',
-      'addressLocality': '서울',
+      'streetAddress': '중부대로 184, 힉스유타워 A동 513호',
+      'addressLocality': '용인시 기흥구',
+      'addressRegion': '경기도',
       'addressCountry': 'KR',
     },
     'priceRange': '$$',

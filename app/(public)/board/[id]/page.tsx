@@ -1,8 +1,12 @@
-import { doc, getDoc, collection, getDocs } from 'firebase/firestore';
-import { db } from '@/src/lib/firebase';
-import { Metadata, ResolvingMetadata } from 'next';
+import { Metadata } from 'next';
 import BoardClient from './BoardClient';
-import { getSeoSettings } from '@/src/lib/api-server';
+import {
+  getBoardPostServer,
+  getBoardPostsServer,
+  getSeoSettings,
+  plainTextFromHtml,
+  type BoardPublicPost,
+} from '@/src/lib/api-server';
 
 const SITE_NAME = "MAI PARTNERS";
 const SITE_URL = "https://maiptns.com";
@@ -13,39 +17,46 @@ type Props = {
 
 export async function generateStaticParams() {
   try {
-    const querySnapshot = await getDocs(collection(db, "board"));
-    return querySnapshot.docs.map((doc) => ({ id: doc.id }));
+    const posts = await getBoardPostsServer();
+    return posts.map((post) => ({ id: String(post.id) }));
   } catch {
     return [];
   }
 }
 
+function getDescription(post: BoardPublicPost): string {
+  const blockText = post.blocks
+    ?.filter((block) => block.type === 'text')
+    .map((block) => block.type === 'text' ? plainTextFromHtml(block.html || '') : '')
+    .join(' ');
+  return (plainTextFromHtml(blockText || post.content || '') || `${post.title} | 마이파트너스 소식`).slice(0, 155);
+}
+
 export async function generateMetadata(
   { params }: Props,
-  parent: ResolvingMetadata
 ): Promise<Metadata> {
   const { id } = await params;
-  const [docSnap, seo] = await Promise.all([
-    getDoc(doc(db, "board", id)),
+  const [post, seo] = await Promise.all([
+    getBoardPostServer(id),
     getSeoSettings(),
   ]);
 
-  if (!docSnap.exists()) return { title: { absolute: `게시판 | ${SITE_NAME}` }, alternates: { canonical: `${SITE_URL}/board` } };
+  if (!post) return { title: { absolute: `게시판 | ${SITE_NAME}` }, alternates: { canonical: `${SITE_URL}/board` } };
 
-  const post = docSnap.data();
   const title = `${post.title} - 게시판 | ${SITE_NAME}`;
-  const description = `${post.title} | 마이파트너스 소식`;
+  const description = getDescription(post);
   const image = post.thumbnail || seo.ogImage;
+  const canonical = `${SITE_URL}/board/${encodeURIComponent(String(post.id))}`;
 
   return {
     title: { absolute: title },
     description,
-    alternates: { canonical: `${SITE_URL}/board/${encodeURIComponent(id)}` },
+    alternates: { canonical },
     openGraph: {
       title,
       description,
       images: [image],
-      url: `${SITE_URL}/board/${encodeURIComponent(id)}`,
+      url: canonical,
       type: 'article',
     },
     twitter: {
@@ -59,35 +70,26 @@ export async function generateMetadata(
 
 export default async function BoardDetailPage({ params }: Props) {
   const { id } = await params;
-
-  let jsonLd: object | null = null;
-
-  try {
-    const [docSnap, seo] = await Promise.all([
-      getDoc(doc(db, "board", id)),
-      getSeoSettings(),
-    ]);
-    if (docSnap.exists()) {
-      const post = docSnap.data();
-      const description = `${post.title} | 마이파트너스 소식`;
-
-      jsonLd = {
-        '@context': 'https://schema.org',
-        '@type': 'Article',
-        headline: post.title,
-        description,
-        image: post.thumbnail || seo.ogImage,
-        url: `${SITE_URL}/board/${id}`,
-        publisher: {
-          '@type': 'Organization',
-          name: SITE_NAME,
-          url: SITE_URL,
-        },
-      };
-    }
-  } catch {
-    // 빌드 시 Firestore 접근 실패 시 클라이언트 렌더링으로 fallback
-  }
+  const [post, seo] = await Promise.all([
+    getBoardPostServer(id).catch(() => null),
+    getSeoSettings(),
+  ]);
+  const canonical = post ? `${SITE_URL}/board/${encodeURIComponent(String(post.id))}` : `${SITE_URL}/board`;
+  const jsonLd = post ? {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.title,
+    description: getDescription(post),
+    image: post.thumbnail || seo.ogImage,
+    url: canonical,
+    datePublished: post.createdAt,
+    dateModified: post.updatedAt || post.createdAt,
+    publisher: {
+      '@type': 'Organization',
+      name: SITE_NAME,
+      url: SITE_URL,
+    },
+  } : null;
 
   return (
     <>
@@ -97,7 +99,7 @@ export default async function BoardDetailPage({ params }: Props) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       )}
-      <BoardClient />
+      <BoardClient id={String(post?.id || id)} initialPost={post} />
     </>
   );
 }

@@ -6,6 +6,9 @@ on:
   # main 브랜치에 push할 때도 실행
   push:
     branches: [main]
+  # Functions 결제가 비활성화되어도 CMS 콘텐츠 변경을 자동 반영
+  schedule:
+    - cron: '*/10 * * * *'
 
 # 같은 그룹의 빌드가 이미 실행 중이면 취소하고 최신 것만 실행
 concurrency:
@@ -26,29 +29,32 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
+      - name: Firestore 콘텐츠 변경 확인
+        id: content_check
+        if: github.event_name == 'schedule'
+        run: node scripts/check-content-changes.mjs
+
       - name: 루트 의존성 설치
+        if: github.event_name != 'schedule' || steps.content_check.outputs.changed == 'true'
         run: npm ci
 
       - name: Functions 의존성 설치
+        if: github.event_name != 'schedule' || steps.content_check.outputs.changed == 'true'
         run: cd functions && npm ci
 
       - name: 사이트 빌드 (Next.js + Vite + finalize)
+        if: github.event_name != 'schedule' || steps.content_check.outputs.changed == 'true'
         run: npm run build
 
       - name: Firebase Hosting 배포
+        if: github.event_name != 'schedule' || steps.content_check.outputs.changed == 'true'
         run: npx firebase-tools deploy --only hosting --non-interactive --token "$FIREBASE_TOKEN"
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
 
-      # 배포 후 구글 봇에게 새 사이트맵 알림
-      - name: Google 사이트맵 핑
-        run: |
-          curl -sf "https://www.google.com/ping?sitemap=https://maiptns.com/sitemap.xml" \
-            && echo "✅ Google ping 성공" \
-            || echo "⚠️ Google ping 실패 (무시하고 계속)"
-
       # 네이버 봇에게도 알림
       - name: Naver 사이트맵 핑
+        if: github.event_name != 'schedule' || steps.content_check.outputs.changed == 'true'
         run: |
           curl -sf "https://searchadvisor.naver.com/xml/ping?sitemap=https://maiptns.com/sitemap.xml" \
             && echo "✅ Naver ping 성공" \

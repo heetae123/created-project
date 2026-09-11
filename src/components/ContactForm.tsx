@@ -194,9 +194,9 @@ export default function ContactForm() {
             <div className="inline-block px-4 py-1 rounded-full bg-[#F97316]/10 border border-[#F97316]/20 text-[#F97316] text-[10px] font-black tracking-[0.3em] uppercase">
               {texts.contactLabel ?? 'Contact Us'}
             </div>
-            <h2 className="text-3xl md:text-5xl font-black text-zinc-100 leading-[1.2] tracking-tight" style={{ fontSize: texts.contactTitleSize || 48 }}>
+            <h1 className="text-3xl md:text-5xl font-black text-zinc-100 leading-[1.2] tracking-tight" style={{ fontSize: texts.contactTitleSize || 48 }}>
               <HighlightText text={texts.contactTitle ?? '지금 마이파트너스의\n"완벽한 행사"를 경험하세요!'} color={texts.contactColor || '#F97316'} />
-            </h2>
+            </h1>
             <div className="w-12 h-[1px] bg-gradient-to-r from-[#F97316] to-transparent mx-auto lg:mx-0" />
             <p className="text-zinc-400 font-medium text-sm md:text-base leading-relaxed max-w-2xl mx-auto lg:mx-0 whitespace-pre-line" style={{ fontSize: texts.contactDescSize || 14 }}>
               {texts.contactDesc ?? '전문 디렉터가 24시간 이내에 작성하신 내용을 바탕으로 최적의 견적을 제안해 드립니다.'}

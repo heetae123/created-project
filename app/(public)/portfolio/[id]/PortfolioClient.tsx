@@ -1,11 +1,13 @@
 "use client";
-import dynamic from 'next/dynamic';
-import { usePathname } from 'next/navigation';
+import PortfolioDetail from '@/src/components/PortfolioDetail';
+import type { PortfolioPublicItem } from '@/src/lib/api-server';
 
-const PortfolioDetail = dynamic(() => import('@/src/components/PortfolioDetail'), { ssr: false });
-
-export default function PortfolioClient() {
-  const pathname = usePathname();
-  const id = pathname.split('/').filter(Boolean).pop() ?? '';
-  return <PortfolioDetail id={id} />;
+export default function PortfolioClient({
+  id,
+  initialItem,
+}: {
+  id: string;
+  initialItem: PortfolioPublicItem | null;
+}) {
+  return <PortfolioDetail id={id} initialItem={initialItem} />;
 }

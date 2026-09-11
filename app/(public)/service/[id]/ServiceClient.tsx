@@ -1,11 +1,6 @@
 "use client";
-import dynamic from 'next/dynamic';
-import { usePathname } from 'next/navigation';
+import ServiceDetail from '@/src/components/ServiceDetail';
 
-const ServiceDetail = dynamic(() => import('@/src/components/ServiceDetail'), { ssr: false });
-
-export default function ServiceClient() {
-  const pathname = usePathname();
-  const id = pathname.split('/').filter(Boolean).pop() ?? '';
+export default function ServiceClient({ id }: { id: string }) {
   return <ServiceDetail id={id} />;
 }

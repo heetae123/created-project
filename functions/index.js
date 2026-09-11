@@ -9,6 +9,7 @@ const multer = require("multer");
 const os = require("os");
 const fs = require("fs");
 const path = require("path");
+const { isDeepStrictEqual } = require("util");
 
 admin.initializeApp();
 const db = admin.firestore();
@@ -400,6 +401,20 @@ exports.onPortfolioWrite = onDocumentWritten(
 exports.onBoardWrite = onDocumentWritten(
   { document: "board/{docId}", region: "asia-northeast3", secrets: [GITHUB_TOKEN] },
   async (event) => {
+    const before = event.data.before.exists ? event.data.before.data() : null;
+    const after = event.data.after.exists ? event.data.after.data() : null;
+
+    if (before && after) {
+      const beforeContent = { ...before };
+      const afterContent = { ...after };
+      delete beforeContent.views;
+      delete afterContent.views;
+      if (isDeepStrictEqual(beforeContent, afterContent)) {
+        console.log("Build skipped: board views only/", event.params.docId);
+        return;
+      }
+    }
+
     try {
       await triggerGithubDeploy(GITHUB_TOKEN.value());
       console.log("Build triggered: board/", event.params.docId);

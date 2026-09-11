@@ -1,4 +1,3 @@
 "use client";
-import dynamic from 'next/dynamic';
-const Team = dynamic(() => import('@/src/components/Team'), { ssr: false });
+import Team from '@/src/components/Team';
 export default function TeamClient() { return <Team />; }

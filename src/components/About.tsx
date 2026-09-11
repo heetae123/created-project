@@ -68,7 +68,7 @@ export default function About() {
             >
               Company
             </motion.span>
-            <motion.h2
+            <motion.h1
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -77,7 +77,7 @@ export default function About() {
             >
               상상을 현실로 만드는 <br />
               크리에이티브 파트너
-            </motion.h2>
+            </motion.h1>
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}

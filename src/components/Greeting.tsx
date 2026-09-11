@@ -32,6 +32,28 @@ const defaultData = {
   bodyColor: '#525252',
 };
 
+function plainText(value: string): string {
+  return value
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function RichText({ html }: { html: string }) {
+  const [sanitizedHtml, setSanitizedHtml] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSanitizedHtml(DOMPurify.sanitize(html));
+  }, [html]);
+
+  if (sanitizedHtml === null) return <p>{plainText(html)}</p>;
+  return <div dangerouslySetInnerHTML={{ __html: sanitizedHtml }} />;
+}
+
 export default function Greeting() {
 
   const [data, setData] = useState(defaultData);
@@ -100,12 +122,9 @@ export default function Greeting() {
               const textContent = block.html || block.content;
               if (block.type === 'text' && textContent) {
                 return (
-                  <div
-                    key={idx}
-                    className="prose prose-zinc max-w-none ql-editor"
-                    style={{ padding: 0, minHeight: 'auto' }}
-                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(textContent) }}
-                  />
+                  <div key={idx} className="prose prose-zinc max-w-none ql-editor" style={{ padding: 0, minHeight: 'auto' }}>
+                    <RichText html={textContent} />
+                  </div>
                 );
               }
               if (block.type === 'image' && block.url) {

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { motion } from 'motion/react';
 import { ArrowLeft } from 'lucide-react';
 import { getPortfolioItem } from '../lib/api';
+import type { PortfolioPublicItem } from '../lib/api-server';
 
 interface Block {
   type: 'text' | 'image' | 'video';
@@ -22,30 +23,49 @@ function getVideoEmbedUrl(url: string): string {
   return '';
 }
 
-interface PortfolioItem {
-  id: string;
-  category: string;
-  title: string;
-  thumbnail?: string;
-  image?: string;
-  client?: string;
-  date?: string;
-  description?: string;
-  blocks?: Block[];
+function plainText(value: string): string {
+  return value
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/&amp;/gi, '&')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
-export default function PortfolioDetail({ id: propId }: { id?: string }) {
+function RichText({ html }: { html: string }) {
+  const [sanitizedHtml, setSanitizedHtml] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSanitizedHtml(DOMPurify.sanitize(html));
+  }, [html]);
+
+  if (sanitizedHtml === null) {
+    return <p className="whitespace-pre-wrap">{plainText(html)}</p>;
+  }
+
+  return <div dangerouslySetInnerHTML={{ __html: sanitizedHtml }} />;
+}
+
+export default function PortfolioDetail({
+  id: propId,
+  initialItem = null,
+}: {
+  id?: string;
+  initialItem?: PortfolioPublicItem | null;
+}) {
   const id = propId;
   const router = useRouter();
-  const [item, setItem] = useState<PortfolioItem | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [item, setItem] = useState<PortfolioPublicItem | null>(initialItem);
+  const [loading, setLoading] = useState(!initialItem);
 
 
   useEffect(() => {
     if (!id) return;
     getPortfolioItem(id)
       .then((data: any) => {
-        setItem(data as PortfolioItem | null);
+        setItem(data as PortfolioPublicItem | null);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -151,7 +171,9 @@ export default function PortfolioDetail({ id: propId }: { id?: string }) {
                 transition={{ delay: idx * 0.1 }}
               >
                 {block.type === 'text' && block.content && (
-                  <div className="text-zinc-600 text-lg leading-relaxed prose prose-zinc max-w-none" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(block.content) }} />
+                  <div className="text-zinc-600 text-lg leading-relaxed prose prose-zinc max-w-none">
+                    <RichText html={block.content} />
+                  </div>
                 )}
                 {block.type === 'image' && (
                   <figure className="my-4">
