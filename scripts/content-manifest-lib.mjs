@@ -39,7 +39,7 @@ async function getCollectionDocuments(collectionName) {
       delete fields.password;
     }
     return { name: document.name, fields: stableValue(fields) };
-  }).sort((a, b) => a.name.localeCompare(b.name));
+  }).sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
 }
 
 export async function createContentManifest() {
