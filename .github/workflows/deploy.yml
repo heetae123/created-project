@@ -8,7 +8,8 @@ on:
     branches: [main]
   # Functions 결제가 비활성화되어도 CMS 콘텐츠 변경을 자동 반영
   schedule:
-    - cron: '*/10 * * * *'
+    # 정각 혼잡을 피해 10분 간격으로 확인 (GitHub 예약 실행은 지연될 수 있음)
+    - cron: '3,13,23,33,43,53 * * * *'
 
 # 같은 그룹의 빌드가 이미 실행 중이면 취소하고 최신 것만 실행
 concurrency:
