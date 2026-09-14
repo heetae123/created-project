@@ -5,13 +5,24 @@ import Link from 'next/link';
 import { getSettings } from '../lib/api';
 
 
-const defaultMap = {
-  companyName: '마이파트너스 본사',
-  address: '서울특별시 강남구 테헤란로 123, 넥서스 타워 15층',
-  phone: '02-1234-5678',
-  email: 'contact@mai-event.com',
-  lat: 37.5000,
-  lng: 127.0365,
+export interface MapInfo {
+  companyName: string;
+  address: string;
+  phone: string;
+  email: string;
+  lat: number;
+  lng: number;
+  bizLicense?: string;
+}
+
+const defaultMap: MapInfo = {
+  companyName: '주식회사 마이파트너스',
+  address: '경기도 용인시 기흥구 중부대로 184, 힉스유타워 A동 513호',
+  phone: '050-6192-8300',
+  email: 'info@maiptns.com',
+  lat: 37.2692002,
+  lng: 127.0908828,
+  bizLicense: '442-88-03209',
 };
 
 interface AboutStyles {
@@ -30,10 +41,10 @@ const DEFAULT_ABOUT_STYLES: AboutStyles = {
   accentColor: '#F97316',
 };
 
-export default function About() {
+export default function About({ initialMap = defaultMap }: { initialMap?: MapInfo }) {
 
   const [team, setTeam] = useState<any[]>([]);
-  const [mapInfo, setMapInfo] = useState(defaultMap);
+  const [mapInfo, setMapInfo] = useState<MapInfo>({ ...defaultMap, ...initialMap });
   const [brochureUrl, setBrochureUrl] = useState<string | null>(null);
   const [aboutStyles, setAboutStyles] = useState<AboutStyles>(DEFAULT_ABOUT_STYLES);
 

@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import AboutClient from './AboutClient';
-import { getSeoSettings } from '@/src/lib/api-server';
+import { getMapSettingsServer, getSeoSettings } from '@/src/lib/api-server';
 
 export async function generateMetadata(): Promise<Metadata> {
   const seo = await getSeoSettings();
@@ -23,4 +23,7 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function AboutPage() { return <AboutClient />; }
+export default async function AboutPage() {
+  const initialMap = await getMapSettingsServer();
+  return <AboutClient initialMap={initialMap} />;
+}

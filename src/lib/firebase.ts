@@ -3,10 +3,13 @@ import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 import { getAuth } from 'firebase/auth';
 
+export const FIREBASE_API_KEY = "AIzaSyBVgi2x239eAjP-mM2r9azJJEgJfhjvriw";
+export const FIREBASE_PROJECT_ID = "mai-entertainment";
+
 const firebaseConfig = {
-  apiKey: "AIzaSyBVgi2x239eAjP-mM2r9azJJEgJfhjvriw",
+  apiKey: FIREBASE_API_KEY,
   authDomain: "mai-entertainment.firebaseapp.com",
-  projectId: "mai-entertainment",
+  projectId: FIREBASE_PROJECT_ID,
   storageBucket: "mai-entertainment.firebasestorage.app",
   messagingSenderId: "531100621234",
   appId: "1:531100621234:web:b1975db1e77355bdd7ecab",

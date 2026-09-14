@@ -1,12 +1,13 @@
 const { onRequest } = require("firebase-functions/v2/https");
-const admin = require("firebase-admin");
+const { getApps, initializeApp } = require("firebase-admin/app");
+const { getFirestore } = require("firebase-admin/firestore");
 const express = require("express");
 const fs = require("fs");
 const path = require("path");
 
 // Initialize admin if not already done
-if (!admin.apps.length) admin.initializeApp();
-const db = admin.firestore();
+if (!getApps().length) initializeApp();
+const db = getFirestore();
 
 // ── HTML template (loaded once at cold start) ─────────────
 let templateHtml = "";

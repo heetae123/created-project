@@ -1,7 +1,8 @@
 const { onRequest } = require("firebase-functions/v2/https");
 const { onDocumentCreated, onDocumentWritten } = require("firebase-functions/v2/firestore");
 const { defineSecret } = require("firebase-functions/params");
-const admin = require("firebase-admin");
+const { initializeApp } = require("firebase-admin/app");
+const { getFirestore } = require("firebase-admin/firestore");
 const express = require("express");
 const nodemailer = require("nodemailer");
 const { v2: cloudinary } = require("cloudinary");
@@ -11,8 +12,8 @@ const fs = require("fs");
 const path = require("path");
 const { isDeepStrictEqual } = require("util");
 
-admin.initializeApp();
-const db = admin.firestore();
+initializeApp();
+const db = getFirestore();
 
 const cors = require("cors");
 
@@ -26,21 +27,41 @@ const GITHUB_TOKEN = defineSecret("GITHUB_TOKEN");
 
 async function triggerGithubDeploy(token) {
   const url = `https://api.github.com/repos/${GITHUB_OWNER}/${GITHUB_REPO}/actions/workflows/deploy.yml/dispatches`;
-  const res = await fetch(url, {
-    method: "POST",
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept: "application/vnd.github+json",
-      "X-GitHub-Api-Version": "2022-11-28",
-      "Content-Type": "application/json",
-      "User-Agent": "MAI-Firebase-Functions",
-    },
-    body: JSON.stringify({ ref: "main" }),
-  });
-  // 204 No Content = 성공
-  if (!res.ok && res.status !== 204) {
-    throw new Error(`GitHub API responded with ${res.status}`);
+  const delays = [0, 1000, 3000];
+  let lastError;
+
+  for (let attempt = 0; attempt < delays.length; attempt += 1) {
+    if (delays[attempt] > 0) {
+      await new Promise((resolve) => setTimeout(resolve, delays[attempt]));
+    }
+
+    try {
+      const res = await fetch(url, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/vnd.github+json",
+          "X-GitHub-Api-Version": "2022-11-28",
+          "Content-Type": "application/json",
+          "User-Agent": "MAI-Firebase-Functions",
+        },
+        body: JSON.stringify({ ref: "main" }),
+      });
+
+      // 204 No Content = 성공
+      if (res.ok || res.status === 204) return;
+
+      const detail = (await res.text()).slice(0, 300);
+      lastError = new Error(`GitHub API responded with ${res.status}: ${detail}`);
+
+      // 인증/권한/요청 오류는 같은 invocation 안에서 재시도해도 회복되지 않는다.
+      if (res.status < 500 && res.status !== 429) break;
+    } catch (error) {
+      lastError = error;
+    }
   }
+
+  throw lastError || new Error("GitHub deploy dispatch failed");
 }
 
 // Cloudinary config
@@ -376,6 +397,7 @@ exports.onSettingsWrite = onDocumentWritten(
       console.log("Build triggered: settings/", event.params.docId);
     } catch (e) {
       console.error("Build trigger failed:", e.message);
+      throw e;
     }
   }
 );
@@ -391,6 +413,7 @@ exports.onPortfolioWrite = onDocumentWritten(
       console.log("Build triggered: portfolio/", event.params.docId);
     } catch (e) {
       console.error("Build trigger failed:", e.message);
+      throw e;
     }
   }
 );
@@ -420,6 +443,7 @@ exports.onBoardWrite = onDocumentWritten(
       console.log("Build triggered: board/", event.params.docId);
     } catch (e) {
       console.error("Build trigger failed:", e.message);
+      throw e;
     }
   }
 );

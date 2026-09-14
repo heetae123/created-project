@@ -89,7 +89,8 @@ export async function generateMetadata(): Promise<Metadata> {
 function OrganizationSchema({ ogImage }: { ogImage: string }) {
   const jsonLd = {
     '@context': 'https://schema.org',
-    '@type': 'EventPlanningService',
+    '@type': 'Organization',
+    '@id': 'https://maiptns.com/#organization',
     'name': 'MAI PARTNERS',
     'alternateName': ['마이파트너스', 'MAI파트너스', 'MAIPARTNERS', '마이 파트너스'],
     'url': 'https://maiptns.com',
@@ -159,7 +160,7 @@ function OrganizationSchema({ ogImage }: { ogImage: string }) {
     'slogan': '최고의 이벤트, 최적의 파트너',
     'potentialAction': {
       '@type': 'CommunicateAction',
-      'target': { '@type': 'EntryPoint', 'urlTemplate': 'https://maiptns.com/contact/' },
+      'target': { '@type': 'EntryPoint', 'urlTemplate': 'https://maiptns.com/contact' },
       'name': '이벤트 문의하기',
     },
   };
@@ -176,6 +177,7 @@ function LocalBusinessSchema({ ogImage }: { ogImage: string }) {
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'LocalBusiness',
+    '@id': 'https://maiptns.com/#organization',
     'name': 'MAI PARTNERS (마이파트너스)',
     'image': ogImage,
     'url': 'https://maiptns.com',

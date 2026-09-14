@@ -40,7 +40,7 @@ jobs:
         run: npm ci
 
       - name: Functions 의존성 설치
-        if: github.event_name != 'schedule' || steps.content_check.outputs.changed == 'true'
+        if: github.event_name == 'push'
         run: cd functions && npm ci
 
       - name: 사이트 빌드 (Next.js + Vite + finalize)
@@ -50,6 +50,14 @@ jobs:
       - name: Firebase Hosting 배포
         if: github.event_name != 'schedule' || steps.content_check.outputs.changed == 'true'
         run: npx firebase-tools deploy --only hosting --non-interactive --token "$FIREBASE_TOKEN"
+        env:
+          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+
+      # Functions 소스는 코드 push 시에만 배포한다.
+      # CMS 콘텐츠가 바뀐 때마다 Functions를 재배포하는 낭비를 피한다.
+      - name: Firebase Functions 배포
+        if: github.event_name == 'push'
+        run: npx firebase-tools deploy --only functions --non-interactive --token "$FIREBASE_TOKEN"
         env:
           FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
 

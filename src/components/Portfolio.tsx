@@ -72,7 +72,8 @@ export default function Portfolio({ initialItems = [] }: { initialItems?: Portfo
   });
 
   const totalPages = Math.ceil(filteredItems.length / PER_PAGE);
-  const pagedItems = filteredItems.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  const pageStart = (page - 1) * PER_PAGE;
+  const pageEnd = page * PER_PAGE;
 
   // Reset page when filter changes
   useEffect(() => { setPage(1); }, [activeMain, activeSub]);
@@ -186,7 +187,7 @@ export default function Portfolio({ initialItems = [] }: { initialItems?: Portfo
               </>
             ) : (
             <AnimatePresence mode="wait">
-              {pagedItems.length === 0 ? (
+              {filteredItems.length === 0 ? (
                 <motion.div
                   key="empty"
                   initial={{ opacity: 0 }}
@@ -197,21 +198,24 @@ export default function Portfolio({ initialItems = [] }: { initialItems?: Portfo
                   <p className="text-sm font-black text-zinc-300 uppercase tracking-[0.3em]">No items in this category</p>
                 </motion.div>
               ) : (
-                pagedItems.map((item, idx) => (
-                  <motion.div
-                    key={item.id}
-                    layout
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.98 }}
-                    transition={{ 
-                      delay: idx * 0.05, 
-                      duration: 0.7, 
-                      ease: [0.22, 1, 0.36, 1] 
-                    }}
-                    className="group"
-                  >
-                    <Link href={`/portfolio/${item.id}`} className="block">
+                items.map((item) => {
+                  const filteredIndex = filteredItems.findIndex((candidate) => candidate.id === item.id);
+                  const isVisible = filteredIndex >= pageStart && filteredIndex < pageEnd;
+                  return (
+                    <motion.div
+                      key={item.id}
+                      layout
+                      initial={{ opacity: 0, y: 30 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.98 }}
+                      transition={{
+                        delay: Math.max(filteredIndex, 0) * 0.05,
+                        duration: 0.7,
+                        ease: [0.22, 1, 0.36, 1]
+                      }}
+                      className={isVisible ? 'group' : 'hidden'}
+                    >
+                      <Link href={`/portfolio/${encodeURIComponent(item.id)}`} className="block">
                       <div className="relative aspect-[4/5] overflow-hidden rounded-2xl md:rounded-[1.5rem] mb-4 md:mb-5">
                         {(item.image || item.thumbnail) && (
                           <img
@@ -240,9 +244,10 @@ export default function Portfolio({ initialItems = [] }: { initialItems?: Portfo
                           {item.title}
                         </h3>
                       </div>
-                    </Link>
-                  </motion.div>
-                ))
+                      </Link>
+                    </motion.div>
+                  );
+                })
               )}
             </AnimatePresence>
             )}

@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/src/lib/firebase';
+import { getFirestoreDocumentUpdateTimes } from '@/src/lib/api-server';
 
 export const dynamic = 'force-static';
 
@@ -11,6 +12,22 @@ const serviceSlugs = [
   'ceremony', 'promotion', 'sports', 'vip', 'international',
   'conference', 'contest', 'festival', 'design', 'system', 'hr'
 ];
+
+function portfolioImages(data: Record<string, unknown>): string[] {
+  const blocks = Array.isArray(data.blocks) ? data.blocks : [];
+  const candidates = [
+    data.image,
+    data.thumbnail,
+    ...blocks
+      .filter((block): block is Record<string, unknown> => Boolean(block) && typeof block === 'object')
+      .filter((block) => block.type === 'image')
+      .map((block) => block.url),
+  ];
+
+  return [...new Set(candidates.filter(
+    (value): value is string => typeof value === 'string' && /^https?:\/\//i.test(value),
+  ))];
+}
 
 // Firestore Timestamp, ISO 문자열, 숫자 등 실제 저장된 날짜만 Date로 변환
 function toDate(val: unknown): Date | undefined {
@@ -44,31 +61,40 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }));
 
   try {
+    const [portfolioUpdateTimes, boardUpdateTimes] = await Promise.all([
+      getFirestoreDocumentUpdateTimes('portfolio'),
+      getFirestoreDocumentUpdateTimes('board'),
+    ]);
+
     // 3. Portfolio routes — lastModified는 문서의 실제 수정일 사용
     const portfolioSnap = await getDocs(collection(db, "portfolio"));
     const portfolioRoutes: MetadataRoute.Sitemap = portfolioSnap.docs.map((doc) => {
       const data = doc.data();
-      const lastModified = toDate(data.updatedAt ?? data.createdAt);
+      const lastModified = toDate(data.updatedAt ?? data.createdAt)
+        ?? portfolioUpdateTimes.get(doc.id);
+      const images = portfolioImages(data);
       return {
         url: `${SITE_URL}/portfolio/${encodeURIComponent(doc.id)}`,
         ...(lastModified ? { lastModified } : {}),
-        changeFrequency: 'monthly',
+        ...(images.length > 0 ? { images } : {}),
+        changeFrequency: 'monthly' as const,
         priority: 0.6,
       };
-    });
+    }).sort((a, b) => a.url.localeCompare(b.url));
 
     // 4. Board routes — lastModified는 문서의 실제 수정일 사용
     const boardSnap = await getDocs(collection(db, "board"));
     const boardRoutes: MetadataRoute.Sitemap = boardSnap.docs.map((doc) => {
       const data = doc.data();
-      const lastModified = toDate(data.updatedAt ?? data.createdAt);
+      const lastModified = toDate(data.updatedAt ?? data.createdAt)
+        ?? boardUpdateTimes.get(doc.id);
       return {
         url: `${SITE_URL}/board/${encodeURIComponent(doc.id)}`,
         ...(lastModified ? { lastModified } : {}),
-        changeFrequency: 'weekly',
+        changeFrequency: 'weekly' as const,
         priority: 0.5,
       };
-    });
+    }).sort((a, b) => a.url.localeCompare(b.url));
 
     return [...staticRoutes, ...serviceRoutes, ...portfolioRoutes, ...boardRoutes];
   } catch (e) {

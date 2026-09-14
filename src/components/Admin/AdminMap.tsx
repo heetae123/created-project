@@ -13,13 +13,13 @@ interface MapData {
 }
 
 const DEFAULT: MapData = {
-  companyName: '마이파트너스 본사',
-  address: '서울특별시 강남구 테헤란로 123, 넥서스 타워 15층',
-  lat: 37.5000,
-  lng: 127.0365,
-  phone: '02-1234-5678',
-  email: 'contact@mai-event.com',
-  bizLicense: '123-45-67890',
+  companyName: '주식회사 마이파트너스',
+  address: '경기도 용인시 기흥구 중부대로 184, 힉스유타워 A동 513호',
+  lat: 37.2692002,
+  lng: 127.0908828,
+  phone: '050-6192-8300',
+  email: 'info@maiptns.com',
+  bizLicense: '442-88-03209',
 };
 
 export default function AdminMap() {
@@ -126,7 +126,7 @@ export default function AdminMap() {
             type="text"
             value={data.address}
             onChange={e => set({ address: e.target.value })}
-            placeholder="서울특별시 강남구 테헤란로 123, 넥서스 타워 15층"
+            placeholder="경기도 용인시 기흥구 중부대로 184, 힉스유타워 A동 513호"
             className="w-full px-[14px] py-[10px] border border-[#E5E7EB] rounded-lg text-sm text-[#111827] bg-white focus:outline-none focus:border-[#F97316] focus:ring-[3px] focus:ring-[rgba(249,115,22,0.1)]"
           />
         </div>
@@ -165,7 +165,7 @@ export default function AdminMap() {
               type="text"
               value={data.phone}
               onChange={e => set({ phone: e.target.value })}
-              placeholder="02-1234-5678"
+              placeholder="050-6192-8300"
               className="w-full px-[14px] py-[10px] border border-[#E5E7EB] rounded-lg text-sm text-[#111827] bg-white focus:outline-none focus:border-[#F97316] focus:ring-[3px] focus:ring-[rgba(249,115,22,0.1)]"
             />
           </div>
@@ -175,7 +175,7 @@ export default function AdminMap() {
               type="email"
               value={data.email}
               onChange={e => set({ email: e.target.value })}
-              placeholder="contact@mai-event.com"
+              placeholder="info@maiptns.com"
               className="w-full px-[14px] py-[10px] border border-[#E5E7EB] rounded-lg text-sm text-[#111827] bg-white focus:outline-none focus:border-[#F97316] focus:ring-[3px] focus:ring-[rgba(249,115,22,0.1)]"
             />
           </div>
@@ -187,7 +187,7 @@ export default function AdminMap() {
             type="text"
             value={data.bizLicense}
             onChange={e => set({ bizLicense: e.target.value })}
-            placeholder="123-45-67890"
+            placeholder="442-88-03209"
             className="w-full px-[14px] py-[10px] border border-[#E5E7EB] rounded-lg text-sm text-[#111827] bg-white focus:outline-none focus:border-[#F97316] focus:ring-[3px] focus:ring-[rgba(249,115,22,0.1)]"
           />
         </div>

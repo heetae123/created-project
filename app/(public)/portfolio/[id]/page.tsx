@@ -36,6 +36,17 @@ function getDescription(item: PortfolioPublicItem): string {
   return (summary || fallback).slice(0, 155);
 }
 
+function getImages(item: PortfolioPublicItem, fallback: string): string[] {
+  const blockImages = item.blocks
+    ?.filter((block) => block.type === 'image' && block.url)
+    .map((block) => block.url as string) || [];
+  return [...new Set([item.image, item.thumbnail, ...blockImages, fallback].filter(Boolean) as string[])];
+}
+
+function jsonLd(value: unknown): string {
+  return JSON.stringify(value).replace(/</g, '\\u003c');
+}
+
 export async function generateMetadata(
   { params }: Props,
 ): Promise<Metadata> {
@@ -79,28 +90,46 @@ export default async function PortfolioPage({ params }: Props) {
     getSeoSettings(),
   ]);
   const canonical = item ? `${SITE_URL}/portfolio/${encodeURIComponent(item.id)}` : `${SITE_URL}/portfolio`;
-  const jsonLd = item ? {
+  const structuredData = item ? {
     '@context': 'https://schema.org',
-    '@type': 'Article',
-    headline: item.title,
-    description: getDescription(item),
-    image: item.image || item.thumbnail || seo.ogImage,
-    url: canonical,
-    datePublished: item.createdAt,
-    dateModified: item.updatedAt || item.createdAt,
-    publisher: {
-      '@type': 'Organization',
-      name: SITE_NAME,
-      url: SITE_URL,
-    },
+    '@graph': [
+      {
+        '@type': 'CreativeWork',
+        '@id': `${canonical}#project`,
+        name: item.title,
+        description: getDescription(item),
+        image: getImages(item, seo.ogImage),
+        url: canonical,
+        mainEntityOfPage: canonical,
+        inLanguage: 'ko-KR',
+        ...(item.category ? { genre: item.category } : {}),
+        ...(item.client ? { about: item.client } : {}),
+        ...(item.createdAt ? { dateCreated: item.createdAt } : {}),
+        ...(item.updatedAt ? { dateModified: item.updatedAt } : {}),
+        creator: {
+          '@type': 'Organization',
+          '@id': `${SITE_URL}/#organization`,
+          name: SITE_NAME,
+          url: SITE_URL,
+        },
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: '홈', item: SITE_URL },
+          { '@type': 'ListItem', position: 2, name: '포트폴리오', item: `${SITE_URL}/portfolio` },
+          { '@type': 'ListItem', position: 3, name: item.title, item: canonical },
+        ],
+      },
+    ],
   } : null;
 
   return (
     <>
-      {jsonLd && (
+      {structuredData && (
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: jsonLd(structuredData) }}
         />
       )}
       <PortfolioClient id={item?.id || id} initialItem={item} />
