@@ -22,12 +22,12 @@ jobs:
 
     steps:
       - name: 코드 체크아웃
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
-      - name: Node.js 20 설정
-        uses: actions/setup-node@v4
+      - name: Node.js 22 설정
+        uses: actions/setup-node@v5
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Firestore 콘텐츠 변경 확인
